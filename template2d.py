@@ -23,13 +23,20 @@ def setup(args):
     # -- THE CA MUST BE RELOADED IN THE GUI IF ANY OF THE BELOW ARE CHANGED --
     config.title = "2D test"
     config.dimensions = 2
-    config.states = (0,1,2)
+    # STATES
+    # 0: chaparral (set as background)
+    # 1: fire
+    # 2: burned area
+    # 3: dense forest
+    # 4: lake
+    # 5: canyon
+    config.states = (0,1,2,3,4,5)
     # -------------------------------------------------------------------------
 
     # ---- Override the defaults below (these may be changed at anytime) ----
 
-    config.state_colors = [(1,1,1),(1,0.2,0.2), (0,0,0)]
-    #config.grid_dims = (200,200)
+    config.state_colors = [(1,1,0),(1,0.2,0.2), (0,0,0), (0,0.5,0), (0,1,1), (0.5,0.5,0.5)]
+    config.grid_dims = (50,50)
 
     # ----------------------------------------------------------------------
 
