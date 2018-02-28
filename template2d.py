@@ -23,6 +23,10 @@ def setup(args):
     # -- THE CA MUST BE RELOADED IN THE GUI IF ANY OF THE BELOW ARE CHANGED --
     config.title = "2D test"
     config.dimensions = 2
+    #chaparral = (288,1);
+    #canyon = (144,0.5);
+    #dense_forest = (8064,3); #burns for 28 days
+    #lake = (0,0); #possible glitch - think instantaneously on fire and spread to adjacents
     config.states = (0,1,2)
     # -------------------------------------------------------------------------
 
