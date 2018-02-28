@@ -62,6 +62,10 @@ def transition_function(grid, neighbourstates, neighbourcounts):
     off_fire_cells = (grid == 0) # cells currently not on fire
     eight_off_neighbours = (neighbourcounts[0] == 8)
     stays_off_fire = off_fire_cells & eight_off_neighbours
+    forest_ignition3 = forest_ignition2 & (neighbourcounts[1] > 0)
+    forest_ignition2 = forest_ignition1 & (neighbourcounts[1] > 0)
+    forest_ignition1 = (grid == 3) & (neighbourcounts[1] > 0)
+    
 
     # if current state is off_fire (0), and it has one or more on-fire neighbours,
     # then it changes to on-fire (1).
@@ -71,7 +75,6 @@ def transition_function(grid, neighbourstates, neighbourcounts):
     # currently state on-fire
     current_fire = (grid == 1)
     """decaygrid[current_fire] -= 1
-
     decayed_to_zero = (decaygrid == 0)
     grid[decayed_to_zero] = 0 """
 
@@ -88,7 +91,7 @@ def transition_function(grid, neighbourstates, neighbourcounts):
     # Set cells to 0 where cell is off-fire
     grid[stays_off_fire] = 0
     # Set cells to 1 where cell is on fire
-    grid[to_on_fire | current_fire] = 1
+    grid[to_on_fire | current_fire | forest_ignition3] = 1
     # Set cells to 2 where cell is burned
     grid[to_burned | to_burned2] = 2
     return grid
