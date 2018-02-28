@@ -31,6 +31,10 @@ def setup(args):
     # 4: lake
     # 5: canyon
     config.states = (0,1,2,3,4,5)
+    #chaparral = (288,1);
+    #canyon = (144,0.5);
+    #dense_forest = (8064,3); #burns for 28 days
+    #lake = (0,0); #possible glitch - if system thinks instantaneously on fire and spread to adjacents
     # -------------------------------------------------------------------------
 
     # ---- Override the defaults below (these may be changed at anytime) ----
