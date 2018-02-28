@@ -26,7 +26,7 @@ def setup(args):
     #chaparral = (288,1);
     #canyon = (144,0.5);
     #dense_forest = (8064,3); #burns for 28 days
-    #lake = (0,0); #possible glitch - think instantaneously on fire and spread to adjacents
+    #lake = (0,0); #possible glitch - if system thinks instantaneously on fire and spread to adjacents
     config.states = (0,1,2)
     # -------------------------------------------------------------------------
 
