@@ -41,6 +41,7 @@ def setup(args):
 
     config.state_colors = [(1,1,0),(1,0.2,0.2), (0,0,0), (0,0.5,0), (0,1,1), (0.5,0.5,0.5)]
     config.grid_dims = (50,50)
+    config.wrap = False #should solve the problem with fire starting at all 4 corners
 
     # ----------------------------------------------------------------------
 
