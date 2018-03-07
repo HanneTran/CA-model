@@ -53,8 +53,8 @@ def setup(args):
         sys.exit()
     return config
 
-
-def transition_function(grid, neighbourstates, neighbourcounts):
+#added forest_ignition and fuel_reserves as arguements
+def transition_function(grid, neighbourstates, neighbourcounts, forest_ignition, fuel_reserves):
     """Function to apply the transition rules
     and return the new grid"""
     # off-fire = state == 0, on-fire = state == 1, burned = state == 2
@@ -68,6 +68,12 @@ def transition_function(grid, neighbourstates, neighbourcounts):
     forest_ignition3 = forest_ignition2 & (neighbourcounts[1] > 0)
 
 
+    forest = (grid==3)
+    canyon = (grid==5)
+
+    fuel_reserves[canyon] = 2
+    fuel_reserves[forest] = 10
+
     # if current state is off_fire (0), and it has one or more on-fire neighbours,
     # then it changes to on-fire (1).
     on_fire_neighbour = (neighbourcounts[1] > 0)
@@ -79,6 +85,9 @@ def transition_function(grid, neighbourstates, neighbourcounts):
     decayed_to_zero = (decaygrid == 0)
     grid[decayed_to_zero] = 0 """
 
+    """
+    previous code to switch cells from on fire to burnt
+
     burned = (grid == 2) #black cells
     eight_burn = (neighbourcounts[1] > 6)
     to_burned = current_fire & eight_burn # if current cell is on-fire and has 8 on-fire neighbours
@@ -86,6 +95,22 @@ def transition_function(grid, neighbourstates, neighbourcounts):
 
     one_or_more_neighbour_to_burn = (neighbourcounts[1] > 0) & burned_neighbour
     to_burned2 = current_fire & one_or_more_neighbour_to_burn
+    """
+
+    #check how much fuel cell has left and burns out once none left
+    fuel_reserves[current_fire] -= 1
+    burn_out = (fuel_reserves == 0)
+
+    #sets canyon on fire once burning neighbour
+    canyon_to_fire = canyon & (neighbourcounts[1]>0)
+    #lower function needs to be added to ignite two canyon cells in one tick
+    #canyon_collateral =
+
+    #will tick down forest and then set on fire so not instant ignition
+    forest_fire = (neighbourcounts[1] > 0)
+    catching_fire = forest & forest_fire
+    forest_ignition[catching_fire] -= 1
+    caught_fire = (forest_ignition==0)
 
     # Set all cells to 0 (off-fire)
     #grid[:, :] = 0
@@ -94,7 +119,8 @@ def transition_function(grid, neighbourstates, neighbourcounts):
     # Set cells to 1 where cell is on fire
     grid[to_on_fire | current_fire | forest_ignition3] = 1
     # Set cells to 2 where cell is burned
-    grid[to_burned | to_burned2] = 2
+    #outdated: grid[to_burned | to_burned2] = 2
+    grid[burn_out] = 2
     return grid
 
 
@@ -102,10 +128,17 @@ def main():
     """ Main function that sets up, runs and saves CA"""
     # Get the config object from set up
     config = setup(sys.argv[1:])
-    #decaygrid = np.zeros(config.grid_dims)
-    #decaygrid.fill(2)
+    #sets default num of ticks for forest to ignite
+    forest_ignition = np.zeros(config.grid_dims)
+    forest_ignition.fill(3)
+
+    #sets default fuel for chaparral and other states can be adjusted later
+    fuel_reserves = np.zeros(config.grid_dims)
+    fuel_reserves.fill(5)
+
     # Create grid object using parameters from config + transition function
-    grid = Grid2D(config, transition_function)
+    #added forest_ignition and fuel_reserves as arguements
+    grid = Grid2D(config, (transition_function, forest_ignition, fuel_reserves))
 
     # Run the CA, save grid state every generation to timeline
     timeline = grid.run()
