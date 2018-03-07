@@ -40,7 +40,7 @@ def setup(args):
     # ---- Override the defaults below (these may be changed at anytime) ----
 
     config.state_colors = [(1,1,0),(1,0.2,0.2), (0,0,0), (0,0.5,0), (0,1,1), (0.5,0.5,0.5)]
-    config.grid_dims = (50,50)
+    config.grid_dims = (200, 200)
     config.wrap = False #should solve the problem with fire starting at all 4 corners
 
     # ----------------------------------------------------------------------
@@ -63,10 +63,10 @@ def transition_function(grid, neighbourstates, neighbourcounts):
     off_fire_cells = (grid == 0) # cells currently not on fire
     eight_off_neighbours = (neighbourcounts[0] == 8)
     stays_off_fire = off_fire_cells & eight_off_neighbours
-    forest_ignition3 = forest_ignition2 & (neighbourcounts[1] > 0)
-    forest_ignition2 = forest_ignition1 & (neighbourcounts[1] > 0)
     forest_ignition1 = (grid == 3) & (neighbourcounts[1] > 0)
-    
+    forest_ignition2 = forest_ignition1 & (neighbourcounts[1] > 0)
+    forest_ignition3 = forest_ignition2 & (neighbourcounts[1] > 0)
+
 
     # if current state is off_fire (0), and it has one or more on-fire neighbours,
     # then it changes to on-fire (1).
