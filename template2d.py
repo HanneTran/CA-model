@@ -74,10 +74,12 @@ def transition_function(grid, neighbourstates, neighbourcounts, forest_ignition,
     fuel_reserves[canyon] = 2
     fuel_reserves[forest] = 10
 
+    NW, N, NE, W, E, SW, S, SE = neighbourstates
+    wind_fire = (N == 1)|(E == 1) & (SE == 1) | (W == 1) & (SW == 1)
     # if current state is off_fire (0), and it has one or more on-fire neighbours,
     # then it changes to on-fire (1).
     on_fire_neighbour = (neighbourcounts[1] > 0)
-    to_on_fire = off_fire_cells & on_fire_neighbour
+    to_on_fire = off_fire_cells & on_fire_neighbour & wind_fire
 
     # currently state on-fire
     current_fire = (grid == 1)
