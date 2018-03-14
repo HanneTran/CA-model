@@ -55,7 +55,7 @@ def setup(args):
     return config
 
 #added forest_ignition and fuel_reserves as arguements
-def transition_function(grid, neighbourstates, neighbourcounts, forest_ignition, fuel_reserves):
+def transition_function(grid, neighbourstates, neighbourcounts, forest_ignition, fuel_reserves, chaparral_ignition):
     """Function to apply the transition rules
     and return the new grid"""
     # off-fire = state == 0, on-fire = state == 1, burned = state == 2
@@ -76,11 +76,15 @@ def transition_function(grid, neighbourstates, neighbourcounts, forest_ignition,
     fuel_reserves[forest] = 10
 
     NW, N, NE, W, E, SW, S, SE = neighbourstates
-    wind_fire = (N == 1)|(E == 1) & (SE == 1) | (W == 1) & (SW == 1)
-    # if current state is off_fire (0), and it has one or more on-fire neighbours,
+    wind_fire = (N == 1)|(E == 1) & (NE == 1) | (W == 1) & (NW == 1)
+    off_wind = (SE==1)|(S==1)|(SW==1)
+    # if current state is off_fire (0), and it has neighbours upwind or 2 iterations of down wind
     # then it changes to on-fire (1).
-    on_fire_neighbour = (neighbourcounts[1] > 0)
-    to_on_fire = off_fire_cells & on_fire_neighbour & wind_fire
+    chap_with_wind = off_fire_cells & wind_fire
+    chap_no_wind = off_fire_cells & off_wind
+    chaparral_ignition[chap_with_wind] -= 2
+    chaparral_ignition[chap_no_wind] -= 1
+    to_on_fire = (chaparral_ignition<=0)
 
     # currently state on-fire
     current_fire = (grid == 1)
@@ -136,10 +140,13 @@ def main():
     #sets default fuel for chaparral and other states can be adjusted later
     fuel_reserves = np.zeros(config.grid_dims)
     fuel_reserves.fill(5)
+    
+    chaparral_ignition = np.zeros(config.grid_dims)
+    chaparral_ignition.fill(2)
 
     # Create grid object using parameters from config + transition function
     #added forest_ignition and fuel_reserves as arguements
-    grid = Grid2D(config, (transition_function, forest_ignition, fuel_reserves))
+    grid = Grid2D(config, (transition_function, forest_ignition, fuel_reserves, chaparral_ignition))
 
     # Run the CA, save grid state every generation to timeline
     timeline = grid.run()
