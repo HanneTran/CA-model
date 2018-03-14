@@ -75,9 +75,6 @@ def transition_function(grid, neighbourstates, neighbourcounts, forest_ignition,
     off_fire_cells = (grid == 0) # cells currently not on fire
     eight_off_neighbours = (neighbourcounts[0] == 8)
     stays_off_fire = off_fire_cells & eight_off_neighbours
-    forest_ignition1 = (grid == 3) & (neighbourcounts[1] > 0)
-    forest_ignition2 = forest_ignition1 & (neighbourcounts[1] > 0)
-    forest_ignition3 = forest_ignition2 & (neighbourcounts[1] > 0)
 
 
     forest = (grid==3)
@@ -86,8 +83,6 @@ def transition_function(grid, neighbourstates, neighbourcounts, forest_ignition,
     fuel_reserves[canyon] = 2
     fuel_reserves[forest] = 10
 
-    NW, N, NE, W, E, SW, S, SE = neighbourstates
-    wind_fire = (N == 1)|(E == 1) & (SE == 1) | (W == 1) & (SW == 1)
     # if current state is off_fire (0), and it has one or more on-fire neighbours,
     # then it changes to on-fire (1).
     on_fire_neighbour = (neighbourcounts[1] > 0)
@@ -131,7 +126,7 @@ def transition_function(grid, neighbourstates, neighbourcounts, forest_ignition,
     # Set cells to 0 where cell is off-fire
     grid[stays_off_fire] = 0
     # Set cells to 1 where cell is on fire
-    grid[to_on_fire | current_fire | forest_ignition3] = 1
+    grid[to_on_fire | current_fire | canyon_to_fire | caught_fire] = 1
     # Set cells to 2 where cell is burned
     #outdated: grid[to_burned | to_burned2] = 2
     grid[burn_out] = 2
