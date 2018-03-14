@@ -23,6 +23,7 @@ def setup(args):
     # -- THE CA MUST BE RELOADED IN THE GUI IF ANY OF THE BELOW ARE CHANGED --
     config.title = "2D test"
     config.dimensions = 2
+    config.num_generations = 500
     # STATES
     # 0: chaparral (set as background)
     # 1: fire
