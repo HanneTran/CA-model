@@ -32,10 +32,11 @@ def setup(args):
     # 4: lake
     # 5: canyon
     config.states = (0,1,2,3,4,5)
+    #terrain = (burn time, ignition time)
     #chaparral = (288,1);
     #canyon = (144,0.5);
     #dense_forest = (8064,3); #burns for 28 days
-    #lake = (0,0); #possible glitch - if system thinks instantaneously on fire and spread to adjacents
+    #lake = (0,0); 
     # -------------------------------------------------------------------------
 
     # ---- Override the defaults below (these may be changed at anytime) ----
@@ -66,69 +67,46 @@ def setup(args):
     return config
 
 #added forest_ignition and fuel_reserves as arguements
-def transition_function(grid, neighbourstates, neighbourcounts, forest_ignition, fuel_reserves):
+def transition_function(grid, neighbourstates, neighbourcounts, chap_ignition, forest_ignition, fuel_reserves):
     """Function to apply the transition rules
     and return the new grid"""
-    # off-fire = state == 0, on-fire = state == 1, burned = state == 2
-    # create boolean array for off-fire and on-fire rules
-    # if 8 off-fire neighbours and is off-fire -> off-fire
-    off_fire_cells = (grid == 0) # cells currently not on fire
-    eight_off_neighbours = (neighbourcounts[0] == 8)
-    stays_off_fire = off_fire_cells & eight_off_neighbours
-
-
+    
+    # off-fire = state == 0/3/4/5 (depends on terrain), on-fire = state == 1, burned = state == 2
+    # create boolean arrays for each terrain type (that can catch fire)
+    chaparral = (grid == 0) 
     forest = (grid==3)
     canyon = (grid==5)
 
-    fuel_reserves[canyon] = 2
-    fuel_reserves[forest] = 10
+    #Update fuel reserve for uncommon types of terrain (saves on having multiple fuel arrays)
+    fuel_reserves[canyon] = 4
+    fuel_reserves[forest] = 20
 
     # if current state is off_fire (0), and it has one or more on-fire neighbours,
     # then it changes to on-fire (1).
     on_fire_neighbour = (neighbourcounts[1] > 0)
-    to_on_fire = off_fire_cells & on_fire_neighbour
+    
+    #sets canyon on fire once burning neighbour
+    canyon_to_fire = canyon & (neighbourcounts[1]>0)
+    
+    #makes it so that chaparral ignites every second tick that it is neighboured by fire
+    chap_to_fire = chaparral & on_fire_neighbour
+    chap_ignition[chap_catching_fire]-=1
 
-    # currently state on-fire
-    current_fire = (grid == 1)
-    """decaygrid[current_fire] -= 1
-    decayed_to_zero = (decaygrid == 0)
-    grid[decayed_to_zero] = 0 """
-
-    """
-    previous code to switch cells from on fire to burnt
-
-    burned = (grid == 2) #black cells
-    eight_burn = (neighbourcounts[1] > 6)
-    to_burned = current_fire & eight_burn # if current cell is on-fire and has 8 on-fire neighbours
-    burned_neighbour = (neighbourcounts[2] > 0)
-
-    one_or_more_neighbour_to_burn = (neighbourcounts[1] > 0) & burned_neighbour
-    to_burned2 = current_fire & one_or_more_neighbour_to_burn
-    """
-
+    #will tick down forest and then set on fire so not instant ignition
+    forest_catching_fire = forest & on_fire_neighbour
+    forest_ignition[forest_catching_fire] -=1
+    
+    #checks if any of terrain types have ignited
+    caught_fire = (forest_ignition==0)|(chap_ignition==0)|canyon_on_fire
+    
     #check how much fuel cell has left and burns out once none left
+    current_fire = (grid == 1)
     fuel_reserves[current_fire] -= 1
     burn_out = (fuel_reserves == 0)
 
-    #sets canyon on fire once burning neighbour
-    canyon_to_fire = canyon & (neighbourcounts[1]>0)
-    #lower function needs to be added to ignite two canyon cells in one tick
-    #canyon_collateral =
-
-    #will tick down forest and then set on fire so not instant ignition
-    forest_fire = (neighbourcounts[1] > 0)
-    catching_fire = forest & forest_fire
-    forest_ignition[catching_fire] -= 1
-    caught_fire = (forest_ignition==0)
-
-    # Set all cells to 0 (off-fire)
-    #grid[:, :] = 0
-    # Set cells to 0 where cell is off-fire
-    grid[stays_off_fire] = 0
-    # Set cells to 1 where cell is on fire
-    grid[to_on_fire | current_fire | canyon_to_fire | caught_fire] = 1
-    # Set cells to 2 where cell is burned
-    #outdated: grid[to_burned | to_burned2] = 2
+    # Set cells to 1 when cell catches on fire
+    grid[caught_fire] = 1
+    # Set cells to 2 when cell has burned out
     grid[burn_out] = 2
     return grid
 
@@ -137,17 +115,20 @@ def main():
     """ Main function that sets up, runs and saves CA"""
     # Get the config object from set up
     config = setup(sys.argv[1:])
-    #sets default num of ticks for forest to ignite
+    
+    #sets default num of ticks for chaparral and forest to ignite
+    chap_ignition = np.zeros(config.grid_dims)
+    chap_ignition.fill(2)
     forest_ignition = np.zeros(config.grid_dims)
-    forest_ignition.fill(3)
+    forest_ignition.fill(6)
 
     #sets default fuel for chaparral and other states can be adjusted later
     fuel_reserves = np.zeros(config.grid_dims)
-    fuel_reserves.fill(5)
+    fuel_reserves.fill(10)
 
     # Create grid object using parameters from config + transition function
     #added forest_ignition and fuel_reserves as arguements
-    grid = Grid2D(config, (transition_function, forest_ignition, fuel_reserves))
+    grid = Grid2D(config, (transition_function, chap_ignition, forest_ignition, fuel_reserves))
 
     # Run the CA, save grid state every generation to timeline
     timeline = grid.run()
