@@ -42,8 +42,8 @@ def setup(args):
 
     config.state_colors = [(1,1,0),(1,0.2,0.2), (0,0,0), (0,0.5,0), (0,1,1), (0.5,0.5,0.5)]
     config.grid_dims = (200, 200)
-    ##Where i started
-    config.initial_grid = np.full((200,200), 0)
+    #Where i started
+    """config.initial_grid = np.full((200,200), 0)
     for x in range (70,120):
      for y in range (120,160):
       config.initial_grid[y][x] = 3
@@ -52,7 +52,7 @@ def setup(args):
       config.initial_grid[y][x] = 4
     for x in range (140,160):
      for y in range (15,140):
-      config.initial_grid[y][x] = 5
+      config.initial_grid[y][x] = 5"""
     config.wrap = False #should solve the problem with fire starting at all 4 corners
 
     # ----------------------------------------------------------------------
@@ -86,7 +86,7 @@ def transition_function(grid, neighbourstates, neighbourcounts, forest_ignition,
     # if current state is off_fire (0), and it has one or more on-fire neighbours,
     # then it changes to on-fire (1).
     on_fire_neighbour = (neighbourcounts[1] > 0)
-    to_on_fire = off_fire_cells & on_fire_neighbour & wind_fire
+    to_on_fire = off_fire_cells & on_fire_neighbour
 
     # currently state on-fire
     current_fire = (grid == 1)
