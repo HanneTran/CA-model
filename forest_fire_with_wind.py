@@ -67,8 +67,8 @@ def transition_function(grid, neighbourstates, neighbourcounts, chap_ignition, f
     canyon = (grid==5)
 
     #Update fuel reserve for uncommon types of terrain (saves on having multiple fuel arrays)
-    fuel_reserves[canyon] = 2
-    fuel_reserves[forest] = 10
+    fuel_reserves[canyon] = 4
+    fuel_reserves[forest] = 20
 
     NW, N, NE, W, E, SW, S, SE = neighbourstates
     wind_fire = (N == 1)|(E == 1) & (NE == 1) | (W == 1) & (NW == 1)
@@ -124,7 +124,7 @@ def main():
 
     # Create grid object using parameters from config + transition function
     #added forest_ignition and fuel_reserves as arguements
-    grid = Grid2D(config, (transition_function, forest_ignition, fuel_reserves, chap_ignition))
+    grid = Grid2D(config, (transition_function, chap_ignition, forest_ignition, fuel_reserves))
 
     # Run the CA, save grid state every generation to timeline
     timeline = grid.run()
