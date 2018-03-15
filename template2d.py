@@ -43,20 +43,6 @@ def setup(args):
 
     config.state_colors = [(1,1,0),(1,0.2,0.2), (0,0,0), (0,0.5,0), (0,1,1), (0.5,0.5,0.5)]
     config.grid_dims = (200, 200)
-    #Where i started
-    config.initial_grid = np.full((200,200), 0)
-    for x in range (70,120):
-     for y in range (120,160):
-      config.initial_grid[y][x] = 3
-    for x in range (20,70):
-     for y in range (40,70):
-      config.initial_grid[y][x] = 4
-    for x in range (140,160):
-     for y in range (15,140):
-      config.initial_grid[y][x] = 5
-    #set the fire to automatically starting
-    config.initial_grid[0][0] = 1
-    config.initial_grid[0][199] = 1
     config.wrap = False #should solve the problem with fire starting at all 4 corners
 
     # ----------------------------------------------------------------------
