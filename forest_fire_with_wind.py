@@ -72,7 +72,19 @@ def transition_function(grid, neighbourstates, neighbourcounts, chap_ignition, f
 
     NW, N, NE, W, E, SW, S, SE = neighbourstates
     wind_fire = (N == 1)|(E == 1) & (NE == 1) | (W == 1) & (NW == 1)
-    off_wind = (SE==1)|(S==1)|(SW==1)
+    off_wind = (SE==1)&(S==1)|(SE==1)&(SW==1)|(S==1)&(SW==1)
+    
+    """
+    #east
+    wind_fire = (E == 1)|(NE == 1) & (N == 1) | (SE == 1) & (S == 1)
+    off_wind = (NW==1)&(W==1)|(NW==1)&(SW==1)|(W==1)&(SW==1)
+    #south
+    wind_fire = (S == 1)|(SE == 1) & (E == 1) | (SW == 1) & (W == 1)
+    off_wind = (NE==1)&(N==1)|(NE==1)&(NW==1)|(N==1)&(NW==1)
+    #west
+    wind_fire = (W == 1)|(NW == 1) & (N == 1) |(SW == 1) & (S == 1)
+    off_wind = (SE==1)&(E==1)|(SE==1)&(NE==1)|(E==1)&(NE==1)
+    """
 
     #different wind_fire variables to alow us to consider wind coming from other directions
     # if current state is off_fire (0), and it has neighbours upwind or 2 iterations of down wind
