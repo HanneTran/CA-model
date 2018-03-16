@@ -23,7 +23,7 @@ def setup(args):
     # -- THE CA MUST BE RELOADED IN THE GUI IF ANY OF THE BELOW ARE CHANGED --
     config.title = "2D test"
     config.dimensions = 2
-    config.num_generations = 500
+    config.num_generations = 800
     # STATES
     # 0: chaparral (set as background)
     # 1: fire
@@ -35,7 +35,7 @@ def setup(args):
     # 7: fire breaks
     config.states = (0,1,2,3,4,5,6,7)
     #terrain = (ignition_time, burn_time)
-    #chaparral = (2,43); 
+    #chaparral = (2,43);
     #canyon = (1,2);
     #dense_forest = (6,403); #burns for month (approximated to 28 days)
     #lake = (0,0);
@@ -121,7 +121,7 @@ def transition_function(grid, neighbourstates, neighbourcounts, chap_ignition, f
     #different wind_fire variables to alow us to consider wind coming from other directions
     # if current state is off_fire (0), and it has neighbours upwind or 2 iterations of down wind
     # then it changes to on-fire (1).
-    chap_with_wind = chaparral & (wind_fire > 0.50)
+    chap_with_wind = chaparral & (wind_fire > 0.70)
     chap_ignition[chap_with_wind] -= 1
     chap_to_fire = (chap_ignition<=0)
 
