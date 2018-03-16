@@ -34,10 +34,10 @@ def setup(args):
     # 6: town
     # 7: fire breaks
     config.states = (0,1,2,3,4,5,6,7)
-    #terrain = (burn time, ignition time)
-    #chaparral = (1152,2);
-    #canyon = (72,1);
-    #dense_forest = (16128,6); #burns for 28 days
+    #terrain = (ignition_time, burn_time)
+    #chaparral = (2,43); 
+    #canyon = (1,2);
+    #dense_forest = (6,403); #burns for month (approximated to 28 days)
     #lake = (0,0);
     #town
     # -------------------------------------------------------------------------
@@ -48,9 +48,9 @@ def setup(args):
     config.grid_dims = (200, 200)
 
     config.initial_grid = np.full((200,200), 0)
-    for x in range (15,19):
+    """for x in range (15,19):
      for y in range (160,200):
-      config.initial_grid[y][x] = 4
+      config.initial_grid[y][x] = 4"""
     for x in range (70,120):
      for y in range (120,160):
       config.initial_grid[y][x] = 3
@@ -96,8 +96,8 @@ def transition_function(grid, neighbourstates, neighbourcounts, chap_ignition, f
     canyon = (grid==5)
 
     #Update fuel reserve for uncommon types of terrain (saves on having multiple fuel arrays)
-    fuel_reserves[canyon] = 72
-    fuel_reserves[forest] = 16128
+    fuel_reserves[canyon] = 2
+    fuel_reserves[forest] = 403
 
     NW, N, NE, W, E, SW, S, SE = neighbourstates
     burning = neighbourcounts[1]
@@ -122,15 +122,15 @@ def transition_function(grid, neighbourstates, neighbourcounts, chap_ignition, f
     # if current state is off_fire (0), and it has neighbours upwind or 2 iterations of down wind
     # then it changes to on-fire (1).
     chap_with_wind = chaparral & (wind_fire > 0.50)
-    chap_ignition[chap_with_wind] -= 2
-    chap_to_fire = (chap_ignition<=1)
+    chap_ignition[chap_with_wind] -= 1
+    chap_to_fire = (chap_ignition<=0)
 
     #sets canyon on fire once burning neighbour
     canyon_to_fire = canyon & (one_neighbour)
 
     #will tick down forest and then set on fire so not instant ignition
     forest_with_wind = forest & (wind_fire > 0.85)
-    forest_ignition[forest_with_wind] -= 2
+    forest_ignition[forest_with_wind] -= 1
     forest_to_fire = (forest_ignition<=0)
 
 
@@ -156,13 +156,13 @@ def main():
     chap_ignition = np.zeros(config.grid_dims)
     chap_ignition.fill(2)
     forest_ignition = np.zeros(config.grid_dims)
-    forest_ignition.fill(8)
+    forest_ignition.fill(6)
     wind_fire = np.zeros(config.grid_dims)
     wind_fire.fill(0)
 
     #sets default fuel for chaparral and other states can be adjusted later
     fuel_reserves = np.zeros(config.grid_dims)
-    fuel_reserves.fill(1152)
+    fuel_reserves.fill(43)
 
     # Create grid object using parameters from config + transition function
     #added forest_ignition and fuel_reserves as arguements
