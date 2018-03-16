@@ -60,13 +60,13 @@ def setup(args):
      for y in range (190,200):
       config.initial_grid[y][x] = 6
    #set the fire to automatically starting
-    config.initial_grid[0][0] = 1
+    #config.initial_grid[0][0] = 1
     config.initial_grid[0][199] = 1
     #When dealing with south winds
-    #config.initial_grid[0][1] = 1
-    #config.initial_grid[0][198] = 1
-    #config.initial_grid[0][1] = 1
-    #config.initial_grid[0][197] = 1
+    #config.initial_grid[1][0] = 1
+    #config.initial_grid[1][199] = 1
+    #config.initial_grid[2][0] = 1
+    #config.initial_grid[2][199] = 1
 
     config.wrap = False #should solve the problem with fire starting at all 4 corners
 
@@ -81,7 +81,7 @@ def setup(args):
     return config
 
 #added forest_ignition and fuel_reserves as arguements
-def transition_function(grid, neighbourstates, neighbourcounts, chap_ignition, forest_ignition, fuel_reserves):
+def transition_function(grid, neighbourstates, neighbourcounts, chap_ignition, forest_ignition, fuel_reserves, wind_fire):
     """Function to apply the transition rules
     and return the new grid"""
 
@@ -96,12 +96,34 @@ def transition_function(grid, neighbourstates, neighbourcounts, chap_ignition, f
     fuel_reserves[forest] = 20
 
     NW, N, NE, W, E, SW, S, SE = neighbourstates
-    #north wind
-    wind_fire = (N == 1)|((E == 1) & (NE == 1)) | ((W == 1) & (NW == 1))
-    off_wind = ((SE==1) & (S==1))|((SE==1) & (SW==1))|((S==1) & (SW==1))
+    #rand = (np.random.rand(200,200))
+    #wind_fire += rand
+    burning = neighbourcounts[1]
+    four_neighbours = (neighbourcounts[1] >= 4)
+    one_neighbour = ((neighbourcounts[1] > 0) & (neighbourcounts[1] < 4))
+    no_neighbours = (neighbourcounts[1] == 0)
+    #north winds
+    directions = (N == 1)|((E == 1) & (NE == 1)) | ((W == 1) & (NW == 1))
+    #directions = (N == 1)
+    #east winds
+    #directions = (E == 1)|(N == 1) & (NE == 1)|(S == 1) & (SE == 1)
+    #directions = (E == 1)
+    #south winds
+    #directions = (S == 1)
+    #west winds
+    #directions = (W == 1)
+    #wind_fire[no_neighbours|one_neighbour] -= 0.99
+    wind_fire[four_neighbours] += 0.6
+    wind_fire[directions] += 0.45
+    wind_fire[one_neighbour] += 0.30
 
+
+
+    #north wind
+    #wind_fire = (N == 1)|((E == 1) & (NE == 1)) | ((W == 1) & (NW == 1))
+    #off_wind = ((SE==1) & (S==1))|((SE==1) & (SW==1))|((S==1) & (SW==1))
     #east wind
-    #wind_fire = (N == 1)|(NW==1)&(W==1)&(SW==1)|(E == 1)|(NE == 1) & (N == 1) | (SE == 1) & (S == 1)
+    #wind_fire = (NW==1)&(W==1)&(SW==1)|(E == 1)|(NE == 1) & (N == 1) | (SE == 1) & (S == 1)
     #off_wind = (NW==1)&(W==1)&(SW==1)|(S==1)
     #south wind
     #wind_fire = (E == 1) | (W == 1) | (NE == 1) & (N == 1) & (NW == 1)
@@ -114,20 +136,20 @@ def transition_function(grid, neighbourstates, neighbourcounts, chap_ignition, f
     #different wind_fire variables to alow us to consider wind coming from other directions
     # if current state is off_fire (0), and it has neighbours upwind or 2 iterations of down wind
     # then it changes to on-fire (1).
-    chap_with_wind = chaparral & wind_fire
-    chap_no_wind = chaparral & off_wind
+    chap_with_wind = chaparral & (wind_fire > 0.80)
+    #chap_no_wind = chaparral & off_wind
     chap_ignition[chap_with_wind] -= 2
-    chap_ignition[chap_no_wind] -= 1
+    #chap_ignition[chap_no_wind] -= 1
     chap_to_fire = (chap_ignition<=1)
 
     #sets canyon on fire once burning neighbour
-    canyon_to_fire = canyon & (wind_fire|off_wind)
+    canyon_to_fire = canyon & (one_neighbour)
 
     #will tick down forest and then set on fire so not instant ignition
-    forest_with_wind = forest & wind_fire
+    forest_with_wind = forest & (wind_fire > 0.4)
     forest_ignition[forest_with_wind] -= 2
-    forest_no_wind = forest & off_wind
-    forest_ignition[forest_no_wind] -= 1
+    #forest_no_wind = forest & off_wind
+    #forest_ignition[forest_no_wind] -= 1
     forest_to_fire = (forest_ignition<=0)
 
 
@@ -154,6 +176,8 @@ def main():
     chap_ignition.fill(2)
     forest_ignition = np.zeros(config.grid_dims)
     forest_ignition.fill(8)
+    wind_fire = np.zeros(config.grid_dims)
+    wind_fire.fill(0)
 
     #sets default fuel for chaparral and other states can be adjusted later
     fuel_reserves = np.zeros(config.grid_dims)
@@ -161,7 +185,7 @@ def main():
 
     # Create grid object using parameters from config + transition function
     #added forest_ignition and fuel_reserves as arguements
-    grid = Grid2D(config, (transition_function, chap_ignition, forest_ignition, fuel_reserves))
+    grid = Grid2D(config, (transition_function, chap_ignition, forest_ignition, fuel_reserves, wind_fire))
 
     # Run the CA, save grid state every generation to timeline
     timeline = grid.run()
