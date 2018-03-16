@@ -43,6 +43,26 @@ def setup(args):
 
     config.state_colors = [(1,1,0),(1,0.2,0.2), (0,0,0), (0,0.5,0), (0,1,1), (0.5,0.5,0.5)]
     config.grid_dims = (200, 200)
+
+    config.initial_grid = np.full((200,200), 0)
+    for x in range (70,120):
+     for y in range (120,160):
+      config.initial_grid[y][x] = 3
+    for x in range (20,70):
+     for y in range (40,70):
+      config.initial_grid[y][x] = 4
+    for x in range (140,160):
+     for y in range (15,140):
+      config.initial_grid[y][x] = 5
+   #set the fire to automatically starting
+    config.initial_grid[0][0] = 1
+    config.initial_grid[0][199] = 1
+    #When dealing with south winds
+    #config.initial_grid[0][1] = 1
+    #config.initial_grid[0][198] = 1
+    #config.initial_grid[0][1] = 1
+    #config.initial_grid[0][197] = 1
+
     config.wrap = False #should solve the problem with fire starting at all 4 corners
 
     # ----------------------------------------------------------------------
@@ -71,20 +91,20 @@ def transition_function(grid, neighbourstates, neighbourcounts, chap_ignition, f
     fuel_reserves[forest] = 20
 
     NW, N, NE, W, E, SW, S, SE = neighbourstates
-    wind_fire = (N == 1)|(E == 1) & (NE == 1) | (W == 1) & (NW == 1)
-    off_wind = (SE==1)&(S==1)|(SE==1)&(SW==1)|(S==1)&(SW==1)
-    
-    """
-    #east
-    wind_fire = (E == 1)|(NE == 1) & (N == 1) | (SE == 1) & (S == 1)
-    off_wind = (NW==1)&(W==1)|(NW==1)&(SW==1)|(W==1)&(SW==1)
-    #south
-    wind_fire = (S == 1)|(SE == 1) & (E == 1) | (SW == 1) & (W == 1)
-    off_wind = (NE==1)&(N==1)|(NE==1)&(NW==1)|(N==1)&(NW==1)
+    #north wind
+    wind_fire = (N == 1)|((E == 1) & (NE == 1)) | ((W == 1) & (NW == 1))
+    off_wind = ((SE==1) & (S==1))|((SE==1) & (SW==1))|((S==1) & (SW==1))
+
+    #east wind
+    #wind_fire = (N == 1)|(NW==1)&(W==1)&(SW==1)|(E == 1)|(NE == 1) & (N == 1) | (SE == 1) & (S == 1)
+    #off_wind = (NW==1)&(W==1)&(SW==1)|(S==1)
+    #south wind
+    #wind_fire = (E == 1) | (W == 1) | (NE == 1) & (N == 1) & (NW == 1)
+    #off_wind = (NE==1) & (N==1) &(E==1) & (SE==1) | (SW==1)&(W==1)&(N==1)&(NW==1)
     #west
-    wind_fire = (W == 1)|(NW == 1) & (N == 1) |(SW == 1) & (S == 1)
-    off_wind = (SE==1)&(E==1)|(SE==1)&(NE==1)|(E==1)&(NE==1)
-    """
+    #wind_fire = (N == 1)|(W == 1)|(NE == 1)&(E == 1)&(SE==1) |(SW == 1) & (S == 1)|(NW == 1) & (N == 1)
+    #off_wind = (NE==1)&(E==1)&(SE==1)|(NE==1)|(S==1)
+
 
     #different wind_fire variables to alow us to consider wind coming from other directions
     # if current state is off_fire (0), and it has neighbours upwind or 2 iterations of down wind
