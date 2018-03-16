@@ -32,7 +32,7 @@ def setup(args):
     # 4: lake
     # 5: canyon
     # 6: town
-    config.states = (0,1,2,3,4,5,6)
+    config.states = (0,1,2,3,4,5,6,7)
     #terrain = (burn time, ignition time)
     #chaparral = (288,1);
     #canyon = (144,0.5);
@@ -43,10 +43,13 @@ def setup(args):
 
     # ---- Override the defaults below (these may be changed at anytime) ----
 
-    config.state_colors = [(1,1,0),(1,0.2,0.2), (0,0,0), (0,0.5,0), (0,1,1), (0.5,0.5,0.5),(0,0.1,1)]
+    config.state_colors = [(1,1,0),(1,0.2,0.2), (0,0,0), (0,0.5,0), (0,1,1), (0.5,0.5,0.5),(0,0.1,1),(0.4,0.4,0.2)]
     config.grid_dims = (200, 200)
 
     config.initial_grid = np.full((200,200), 0)
+    for x in range (15,19):
+     for y in range (160,200):
+      config.initial_grid[y][x] = 4
     for x in range (70,120):
      for y in range (120,160):
       config.initial_grid[y][x] = 3
@@ -96,60 +99,37 @@ def transition_function(grid, neighbourstates, neighbourcounts, chap_ignition, f
     fuel_reserves[forest] = 20
 
     NW, N, NE, W, E, SW, S, SE = neighbourstates
-    #rand = (np.random.rand(200,200))
-    #wind_fire += rand
     burning = neighbourcounts[1]
     four_neighbours = (neighbourcounts[1] >= 4)
     one_neighbour = ((neighbourcounts[1] > 0) & (neighbourcounts[1] < 4))
     no_neighbours = (neighbourcounts[1] == 0)
     #north winds
-    directions = (N == 1)|((E == 1) & (NE == 1)) | ((W == 1) & (NW == 1))
-    #directions = (N == 1)
+    directions = (N == 1)
     #east winds
-    #directions = (E == 1)|(N == 1) & (NE == 1)|(S == 1) & (SE == 1)
     #directions = (E == 1)
     #south winds
     #directions = (S == 1)
     #west winds
     #directions = (W == 1)
-    #wind_fire[no_neighbours|one_neighbour] -= 0.99
     wind_fire[four_neighbours] += 0.6
     wind_fire[directions] += 0.45
     wind_fire[one_neighbour] += 0.30
 
 
 
-    #north wind
-    #wind_fire = (N == 1)|((E == 1) & (NE == 1)) | ((W == 1) & (NW == 1))
-    #off_wind = ((SE==1) & (S==1))|((SE==1) & (SW==1))|((S==1) & (SW==1))
-    #east wind
-    #wind_fire = (NW==1)&(W==1)&(SW==1)|(E == 1)|(NE == 1) & (N == 1) | (SE == 1) & (S == 1)
-    #off_wind = (NW==1)&(W==1)&(SW==1)|(S==1)
-    #south wind
-    #wind_fire = (E == 1) | (W == 1) | (NE == 1) & (N == 1) & (NW == 1)
-    #off_wind = (NE==1) & (N==1) &(E==1) & (SE==1) | (SW==1)&(W==1)&(N==1)&(NW==1)
-    #west
-    #wind_fire = (N == 1)|(W == 1)|(NE == 1)&(E == 1)&(SE==1) |(SW == 1) & (S == 1)|(NW == 1) & (N == 1)
-    #off_wind = (NE==1)&(E==1)&(SE==1)|(NE==1)|(S==1)
-
-
     #different wind_fire variables to alow us to consider wind coming from other directions
     # if current state is off_fire (0), and it has neighbours upwind or 2 iterations of down wind
     # then it changes to on-fire (1).
-    chap_with_wind = chaparral & (wind_fire > 0.80)
-    #chap_no_wind = chaparral & off_wind
+    chap_with_wind = chaparral & (wind_fire > 0.50)
     chap_ignition[chap_with_wind] -= 2
-    #chap_ignition[chap_no_wind] -= 1
     chap_to_fire = (chap_ignition<=1)
 
     #sets canyon on fire once burning neighbour
     canyon_to_fire = canyon & (one_neighbour)
 
     #will tick down forest and then set on fire so not instant ignition
-    forest_with_wind = forest & (wind_fire > 0.4)
+    forest_with_wind = forest & (wind_fire > 0.85)
     forest_ignition[forest_with_wind] -= 2
-    #forest_no_wind = forest & off_wind
-    #forest_ignition[forest_no_wind] -= 1
     forest_to_fire = (forest_ignition<=0)
 
 
