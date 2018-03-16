@@ -64,7 +64,9 @@ def setup(args):
      for y in range (190,200):
       config.initial_grid[y][x] = 6
    #set the fire to automatically starting
+    #represents fire at the power plant
     #config.initial_grid[0][0] = 1
+    #represents a fire starting at the incinerator
     config.initial_grid[0][199] = 1
     #When dealing with south winds
     #config.initial_grid[1][0] = 1
@@ -99,6 +101,7 @@ def transition_function(grid, neighbourstates, neighbourcounts, chap_ignition, f
     fuel_reserves[canyon] = 2
     fuel_reserves[forest] = 403
 
+    #unpackage the neighbours so can be used in the wind
     NW, N, NE, W, E, SW, S, SE = neighbourstates
     burning = neighbourcounts[1]
     four_neighbours = (neighbourcounts[1] >= 4)
@@ -112,6 +115,8 @@ def transition_function(grid, neighbourstates, neighbourcounts, chap_ignition, f
     #directions = (S == 1)
     #west winds
     #directions = (W == 1)
+    
+    #adjusts chance to set fire depending on parameters
     wind_fire[four_neighbours] += 0.6
     wind_fire[directions] += 0.45
     wind_fire[one_neighbour] += 0.30
@@ -141,7 +146,7 @@ def transition_function(grid, neighbourstates, neighbourcounts, chap_ignition, f
 
     # Set cells to 1 when cell catches fire
     grid[chap_to_fire | canyon_to_fire | forest_to_fire] = 1
-    # Set cells to 2 where cell is burned
+    # Set cells to 2 when cell has burned out
     grid[burn_out] = 2
     return grid
 
@@ -157,6 +162,8 @@ def main():
     chap_ignition.fill(2)
     forest_ignition = np.zeros(config.grid_dims)
     forest_ignition.fill(6)
+    
+    #grid to accumulate embers until ignites
     wind_fire = np.zeros(config.grid_dims)
     wind_fire.fill(0)
 
