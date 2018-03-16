@@ -32,11 +32,12 @@ def setup(args):
     # 4: lake
     # 5: canyon
     # 6: town
+    # 7: fire breaks
     config.states = (0,1,2,3,4,5,6,7)
     #terrain = (burn time, ignition time)
-    #chaparral = (288,1);
-    #canyon = (144,0.5);
-    #dense_forest = (8064,3); #burns for 28 days
+    #chaparral = (1152,2);
+    #canyon = (72,1);
+    #dense_forest = (16128,6); #burns for 28 days
     #lake = (0,0);
     #town
     # -------------------------------------------------------------------------
@@ -95,8 +96,8 @@ def transition_function(grid, neighbourstates, neighbourcounts, chap_ignition, f
     canyon = (grid==5)
 
     #Update fuel reserve for uncommon types of terrain (saves on having multiple fuel arrays)
-    fuel_reserves[canyon] = 4
-    fuel_reserves[forest] = 20
+    fuel_reserves[canyon] = 72
+    fuel_reserves[forest] = 16128
 
     NW, N, NE, W, E, SW, S, SE = neighbourstates
     burning = neighbourcounts[1]
@@ -161,7 +162,7 @@ def main():
 
     #sets default fuel for chaparral and other states can be adjusted later
     fuel_reserves = np.zeros(config.grid_dims)
-    fuel_reserves.fill(10)
+    fuel_reserves.fill(1152)
 
     # Create grid object using parameters from config + transition function
     #added forest_ignition and fuel_reserves as arguements
