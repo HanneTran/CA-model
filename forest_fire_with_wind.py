@@ -31,17 +31,19 @@ def setup(args):
     # 3: dense forest
     # 4: lake
     # 5: canyon
-    config.states = (0,1,2,3,4,5)
+    # 6: town
+    config.states = (0,1,2,3,4,5,6)
     #terrain = (burn time, ignition time)
     #chaparral = (288,1);
     #canyon = (144,0.5);
     #dense_forest = (8064,3); #burns for 28 days
     #lake = (0,0);
+    #town
     # -------------------------------------------------------------------------
 
     # ---- Override the defaults below (these may be changed at anytime) ----
 
-    config.state_colors = [(1,1,0),(1,0.2,0.2), (0,0,0), (0,0.5,0), (0,1,1), (0.5,0.5,0.5)]
+    config.state_colors = [(1,1,0),(1,0.2,0.2), (0,0,0), (0,0.5,0), (0,1,1), (0.5,0.5,0.5),(0,0.1,1)]
     config.grid_dims = (200, 200)
 
     config.initial_grid = np.full((200,200), 0)
@@ -54,6 +56,9 @@ def setup(args):
     for x in range (140,160):
      for y in range (15,140):
       config.initial_grid[y][x] = 5
+    for x in range (0,15):
+     for y in range (190,200):
+      config.initial_grid[y][x] = 6
    #set the fire to automatically starting
     config.initial_grid[0][0] = 1
     config.initial_grid[0][199] = 1
